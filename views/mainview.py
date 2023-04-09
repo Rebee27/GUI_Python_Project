@@ -1,5 +1,6 @@
 import json
 
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, \
     QTableWidgetItem, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QLineEdit
@@ -78,15 +79,14 @@ class MainView(QWidget):
         # the extract button
         self.extractButton = QPushButton("Extract Data")
         self.extractButton.setStyleSheet("background-color: #4CAF50; color: white; font-size: 18px;")
-        self.extractButton.setFixedWidth(500)
         self.extractButton.clicked.connect(self.extractData)
+        self.extractButton.setCursor(QtCore.Qt.PointingHandCursor)
         layout.addWidget(self.extractButton)
 
         # the progress bar
         self.progressBar = QProgressBar()
         self.progressBar.setStyleSheet("QProgressBar {border: 2px solid grey; border-radius: 5px; padding: 1px;}"
                                        "QProgressBar::chunk {background-color: #05B8CC;}")
-        self.progressBar.setFixedWidth(500)
         layout.addWidget(self.progressBar)
 
         # the label with the progress of the extracting data
@@ -97,8 +97,9 @@ class MainView(QWidget):
         # the show data button
         self.showButton = QPushButton("Show all cities")
         self.showButton.setStyleSheet("background-color: #05B8CC; color: white; font-size: 18px;")
-        self.showButton.setFixedWidth(500)
         self.showButton.clicked.connect(self.showData)
+        self.showButton.setCursor(QtCore.Qt.PointingHandCursor)
+        self.showButton.setEnabled(False)
         layout.addWidget(self.showButton)
 
         # the search bar
@@ -119,6 +120,8 @@ class MainView(QWidget):
         self.searchButton.setStyleSheet("background-color: #05B8CC; color: white; font-size: 18px;")
         self.searchButton.clicked.connect(self.searchCities)
         self.searchLayout.addWidget(self.searchButton)
+        self.searchButton.setCursor(QtCore.Qt.PointingHandCursor)
+        self.searchButton.setEnabled(False)
 
         layout.addLayout(self.searchLayout)
 
@@ -131,6 +134,8 @@ class MainView(QWidget):
         self.progressBar.setValue(100)
         self.statusLabel.setText("Data extraction complete!")
         self.statusLabel.setStyleSheet("color: green; font-size: 18px;")
+        self.showButton.setEnabled(True)
+        self.searchButton.setEnabled(True)
 
     def updateProgressBar(self, value):
         self.progressBar.setValue(value)
@@ -148,9 +153,13 @@ class MainView(QWidget):
                     if query in city.lower():
                         filtered_data[city] = restaurants
 
-                # Create a new window with the table widget
-                self.tableWindow = RestaurantTable(filtered_data)
-                self.tableWindow.show()
+                if not filtered_data:
+                    # If the filtered data is empty, i.e., no city matched the search query, show a message
+                    QtWidgets.QMessageBox.warning(self, "No results", "No city matches!")
+                else:
+                    # Create a new window with the table widget
+                    self.tableWindow = RestaurantTable(filtered_data)
+                    self.tableWindow.show()
 
         except Exception as e:
             print(e)
