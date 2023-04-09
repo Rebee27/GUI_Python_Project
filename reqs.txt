@@ -1,0 +1,5 @@
+requests
+PyQt6
+lxml
+auto-py-to-exe
+bs4
