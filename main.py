@@ -11,8 +11,7 @@ if sys.platform.startswith("win"):
 
 from views.mainview import MainView
 
-os.chdir(r"G:\My Drive\7. Future_Up\Gog_Rebeca_Project_v3")
-
+os.chdir(r"G:\My Drive\7. Future_Up\GUI_Python_Project")
 
 if __name__ == '__main__':
     app = QApplication([])
