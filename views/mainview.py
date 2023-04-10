@@ -75,7 +75,7 @@ class CitiesTable(QScrollArea):
         self.setWidgetResizable(True)
 
 
-# MainWindow is the main PyQt window that contains two buttons for extracting and showing the data
+# the main PyQt window that contains two buttons for extracting, showing the data and a search city section
 class MainView(QWidget):
     def __init__(self):
         super().__init__()

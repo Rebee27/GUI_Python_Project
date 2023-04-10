@@ -29,13 +29,13 @@ class Extractor:
         # Extract restaurant information for each city
         for index, city in enumerate(cities):
             # remove the discritics in the city name
-            city = unidecode(city)
+            city2 = unidecode(city)
 
             # make the city name lowercase to match the https request
-            city = city.lower()
+            city2 = city2.lower()
 
             # make a request to the site where are all the restaurants for the current city
-            url = f"https://tazz.ro/{city}/restaurante"
+            url = f"https://tazz.ro/{city2}/restaurante"
             response = requests.get(url)
             soup = BeautifulSoup(response.content, 'html.parser')
             restaurants = []
