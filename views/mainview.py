@@ -2,17 +2,18 @@ import json
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, \
-    QTableWidgetItem, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QLineEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, \
+    QTableWidgetItem, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QLineEdit, QScrollArea
+
 from helpers.TazzExtractor import Extractor
 
 
-# RestaurantTable is a PyQt widget that displays the extracted data in a table format
+# displays the restaurants for a city in a table format
 class RestaurantTable(QWidget):
     def __init__(self, data):
         super().__init__()
         self.title = "Tazz Partner Restaurants"
-        self.width = 800
+        self.width = 400
         self.height = 600
         self.setWindowTitle(self.title)
         self.setGeometry(200, 200, self.width, self.height)
@@ -34,6 +35,7 @@ class RestaurantTable(QWidget):
             cityLabel.setStyleSheet("font-size: 24px; font-weight: bold; padding-top: 20px;")
             layout.addWidget(cityLabel)
 
+            # display a message if a city doesn't have restaurants
             if len(restaurants) == 0:
                 noRestaurantsLabel = QLabel("There are no restaurants available!")
                 noRestaurantsLabel.setStyleSheet("font-size: 18px;")
@@ -42,7 +44,7 @@ class RestaurantTable(QWidget):
                 self.table_widget = QTableWidget()
                 self.table_widget.setRowCount(len(restaurants))
                 self.table_widget.setColumnCount(3)
-                self.table_widget.setMinimumSize(800, 400)
+                self.table_widget.setMinimumSize(400, 400)
                 self.table_widget.setHorizontalHeaderLabels(['Restaurant', 'Description', 'Stars'])
                 for i, (name, description, stars) in enumerate(restaurants):
                     self.table_widget.setItem(i, 0, QTableWidgetItem(name))
@@ -56,6 +58,21 @@ class RestaurantTable(QWidget):
                 layout.addItem(spacer)
 
         self.setLayout(layout)
+
+
+# displays cities with their restaurants in a scrollable window
+class CitiesTable(QScrollArea):
+    def __init__(self, data):
+        super().__init__()
+        self.title = "Tazz Partner Cities"
+        self.width = 800
+        self.height = 600
+        self.setWindowTitle(self.title)
+        self.setGeometry(200, 200, self.width, self.height)
+
+        self.tableWindow = RestaurantTable(data)
+        self.setWidget(self.tableWindow)
+        self.setWidgetResizable(True)
 
 
 # MainWindow is the main PyQt window that contains two buttons for extracting and showing the data
@@ -102,7 +119,7 @@ class MainView(QWidget):
         self.showButton.setEnabled(False)
         layout.addWidget(self.showButton)
 
-        # the search bar
+        # search label
         self.searchLabel = QLabel('Search city:')
         self.searchLabel.setStyleSheet("font-size: 18px;")
         layout.addWidget(self.searchLabel)
@@ -110,12 +127,14 @@ class MainView(QWidget):
         self.searchLayout = QHBoxLayout()
         self.searchLayout.setSpacing(20)
 
+        # search box
         self.searchBox = QLineEdit()
         self.searchBox.setPlaceholderText("Enter city...")
         self.searchBox.setStyleSheet("font-size: 18px;")
         self.searchBox.setFixedWidth(500)
         self.searchLayout.addWidget(self.searchBox)
 
+        # search button
         self.searchButton = QPushButton("Search")
         self.searchButton.setStyleSheet("background-color: #05B8CC; color: white; font-size: 18px;")
         self.searchButton.clicked.connect(self.searchCities)
@@ -129,6 +148,7 @@ class MainView(QWidget):
 
         self.setLayout(layout)
 
+    # extract data
     def extractData(self):
         self.extractor.extractData()
         self.progressBar.setValue(100)
@@ -137,9 +157,11 @@ class MainView(QWidget):
         self.showButton.setEnabled(True)
         self.searchButton.setEnabled(True)
 
+    # update progress bar
     def updateProgressBar(self, value):
         self.progressBar.setValue(value)
 
+    # search for a city
     def searchCities(self):
         query = self.searchBox.text().lower()
 
@@ -158,12 +180,13 @@ class MainView(QWidget):
                     QtWidgets.QMessageBox.warning(self, "No results", "No city matches!")
                 else:
                     # Create a new window with the table widget
-                    self.tableWindow = RestaurantTable(filtered_data)
+                    self.tableWindow = CitiesTable(filtered_data)
                     self.tableWindow.show()
 
         except Exception as e:
             print(e)
 
+    # show the extracted data
     def showData(self):
         try:
             # Load the extracted data from the JSON file and create a list of tuples to display it in a table
@@ -171,7 +194,7 @@ class MainView(QWidget):
                 data = json.load(f)
 
                 # Create a new window with the table widget
-                self.tableWindow = RestaurantTable(data)
+                self.tableWindow = CitiesTable(data)
                 self.tableWindow.show()
 
         except Exception as e:

@@ -11,19 +11,21 @@ class Extractor:
         self.progressBar = QProgressBar()
         self.progressBar.setValue(0)
 
+    # extract the information
     def extractData(self):
-        # Extract all cities from TAZZ
-
+        # make a request to the site
         url = "https://tazz.ro"
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         cities = []
 
+        # put all the cities in an array
         for city in soup.select('div.cities-cards-list a'):
             cities.append(city.text.strip())
 
         data = {}
         totalCities = len(cities)
+
         # Extract restaurant information for each city
         for index, city in enumerate(cities):
             # remove the discritics in the city name
@@ -32,11 +34,13 @@ class Extractor:
             # make the city name lowercase to match the https request
             city = city.lower()
 
+            # make a request to the site where are all the restaurants for the current city
             url = f"https://tazz.ro/{city}/restaurante"
             response = requests.get(url)
             soup = BeautifulSoup(response.content, 'html.parser')
             restaurants = []
 
+            # extract the name, the description and the rating for the restaurants
             for restaurant in soup.select('div.partnersListLayout div.store-card'):
                 name = restaurant.select_one('div.store-info h3')
                 if name is not None:
@@ -55,9 +59,10 @@ class Extractor:
                 else:
                     description = ''
 
-                # put the details in the restaurant array
+                # put the info in the restaurant array
                 restaurants.append({"name": name, "stars": stars, "description": description})
 
+            # save the data in an array
             data[city] = restaurants
             self.data = data
 
